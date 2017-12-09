@@ -62,10 +62,10 @@ T enforceSdl(T)(T value, string file = __FILE__, size_t line = __LINE__)
 
 // 画像ファイルを読み込み、非矩形ウィンドウに適用する
 void shapedWindowFromImage(    SDL_Window*   window,
-                                  SDL_Renderer* renderer,
-                              ref SDL_Surface*  surface,
-                              ref SDL_Texture*  texture,
-                                  string        path)
+                               SDL_Renderer* renderer,
+                           ref SDL_Surface*  surface,
+                           ref SDL_Texture*  texture,
+                               string        path)
 {
     // 背景画像の読み込み
     auto oldSurface = surface;
@@ -78,7 +78,7 @@ void shapedWindowFromImage(    SDL_Window*   window,
     auto oldTexture = texture;
     texture = enforceSdl(SDL_CreateTextureFromSurface(renderer, surface));
     scope(success) SDL_DestroyTexture(oldTexture);
-    scope(failure) texture = oldTexture;
+    scope(failure) { texture = oldTexture; SDL_FreeSurface(surface); }
 
     SDL_Rect rect;
     enforceSdl(SDL_QueryTexture(texture, null, null, &rect.w, &rect.h) == 0);
@@ -90,7 +90,7 @@ void shapedWindowFromImage(    SDL_Window*   window,
     SDL_WindowShapeMode shapeMode;
     if (surface.format.Amask != 0)
     {
-        // alpha値がある場合それを使用
+        // アルファ値がある場合それを使用
         shapeMode.mode = ShapeModeDefault;
         //shapeMode.parameters.binarizationCutoff = 1;
     }
@@ -177,7 +177,7 @@ void main(string[] args)
 
     // SDLライブラリの初期化
     enforceSdl(SDL_Init(SDL_INIT_EVERYTHING) == 0);
-    scope (exit) SDL_Quit();
+    scope(exit) SDL_Quit();
 
     // ウインドウの生成
     auto window = enforceSdl(
@@ -187,7 +187,7 @@ void main(string[] args)
                                800,
                                600,
                                SDL_WINDOW_BORDERLESS));
-    scope (exit) SDL_DestroyWindow(window);
+    scope(exit) SDL_DestroyWindow(window);
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
     // レンダラーの生成
