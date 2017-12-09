@@ -72,13 +72,13 @@ void shapedWindowFromImage(    SDL_Window*   window,
     //surface = enforceSdl(IMG_Load(path.toStringz));
     surface = enforceSdl(IMG_LoadTyped_RW(SDL_RWFromFile(path.toStringz, "rb"), 1, "PNG"));
     scope(success) SDL_FreeSurface(oldSurface);
-    scope(failure) surface = oldSurface;
+    scope(failure) { SDL_FreeSurface(surface); surface = oldSurface; }
 
     // テクスチャの生成
     auto oldTexture = texture;
     texture = enforceSdl(SDL_CreateTextureFromSurface(renderer, surface));
     scope(success) SDL_DestroyTexture(oldTexture);
-    scope(failure) { texture = oldTexture; SDL_FreeSurface(surface); }
+    scope(failure) { SDL_DestroyTexture(texture); texture = oldTexture; }
 
     SDL_Rect rect;
     enforceSdl(SDL_QueryTexture(texture, null, null, &rect.w, &rect.h) == 0);
@@ -98,50 +98,12 @@ void shapedWindowFromImage(    SDL_Window*   window,
     {
         // 画像の左上座標(0, 0)の色を透過色と見なす
         shapeMode.mode = ShapeModeColorKey;
-        SDL_PixelFormat* fmt = surface.format;
-        SDL_Color tColor = SDL_Color(0, Uint8.max, 0, 0);
 
         SDL_LockSurface(surface);
-        if (fmt.palette)
-        {
-            switch (fmt.BitsPerPixel)
-            {
-                case 8:
-                {
-                    tColor = fmt.palette.colors[ (cast(Uint8* )surface.pixels)[0] ];
-                    break;
-                }
-                case 16:
-                {
-                    tColor = fmt.palette.colors[ (cast(Uint16*)surface.pixels)[0] ];
-                    break;
-                }
-                default:
-                {
-                    debug "Unsupported format".writeln;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            switch (fmt.BitsPerPixel)
-            {
-                case 24:
-                //case 32:
-                {
-                    Uint32 pixel = ( cast(Uint32*)(surface.pixels) )[0];
-                    // R,G,Bの各色成分を得る
-                    SDL_GetRGB(pixel, fmt, &tColor.r, &tColor.g, &tColor.b);
-                    break;
-                }
-                default:
-                {
-                    debug "Unsupported format".writeln;
-                    break;
-                }
-            }
-        }
+        Uint32 pixel = ( cast(Uint32*)(surface.pixels) )[0];
+        // R,G,Bの各色成分を得る
+        SDL_Color tColor;
+        SDL_GetRGB(pixel, surface.format, &tColor.r, &tColor.g, &tColor.b);
         SDL_UnlockSurface(surface);
 
         shapeMode.parameters.colorKey = tColor;
