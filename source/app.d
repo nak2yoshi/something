@@ -69,8 +69,7 @@ void shapedWindowFromImage(    SDL_Window*   window,
 {
     // 背景画像の読み込み
     auto oldSurface = surface;
-    //surface = enforceSdl(IMG_Load(path.toStringz));
-    surface = enforceSdl(IMG_LoadTyped_RW(SDL_RWFromFile(path.toStringz, "rb"), 1, "PNG"));
+    surface = enforceSdl(IMG_Load(path.toStringz));
     scope(success) SDL_FreeSurface(oldSurface);
     scope(failure) { SDL_FreeSurface(surface); surface = oldSurface; }
 
@@ -187,7 +186,14 @@ void main(string[] args)
         char* droppedPath = event.drop.file;
         scope(exit) SDL_free(droppedPath);
         debug "droppedPath: %s".writefln(droppedPath.to!string);
-        shapedWindowFromImage(window, renderer, surface, texture, droppedPath.to!string);
+        try
+        {
+            shapedWindowFromImage(window, renderer, surface, texture, droppedPath.to!string);
+        }
+        catch (Exception ex)
+        {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", ex.msg.toStringz, window);
+        }
         return true;
     };
     // マウスホイールの処理
