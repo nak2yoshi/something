@@ -10,6 +10,6 @@ dependency "derelict-sdl2" version=">=2.0.0"
 versions "Windows7"
 
 buildType "release" {
-    lflags "/exet:nt/su:windows:4.0" platform="windows-x86-dmd"
-    lflags "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup" platform="windows-x86_64-dmd"
+    lflags "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup" platform="windows-x86-dmd"
+    lflags "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup" platform="windows-x86_64-dmd"
 }
