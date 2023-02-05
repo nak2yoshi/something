@@ -69,15 +69,15 @@ void shapedWindowFromImage(    SDL_Window*   window,
 {
     // 背景画像の読み込み
     auto oldSurface = surface;
-    surface = enforceSdl(IMG_Load(path.toStringz));
     scope(success) SDL_FreeSurface(oldSurface);
     scope(failure) { SDL_FreeSurface(surface); surface = oldSurface; }
+    surface = enforceSdl(IMG_Load(path.toStringz));
 
     // テクスチャの生成
     auto oldTexture = texture;
-    texture = enforceSdl(SDL_CreateTextureFromSurface(renderer, surface));
     scope(success) SDL_DestroyTexture(oldTexture);
     scope(failure) { SDL_DestroyTexture(texture); texture = oldTexture; }
+    texture = enforceSdl(SDL_CreateTextureFromSurface(renderer, surface));
 
     SDL_Rect rect;
     enforceSdl(SDL_QueryTexture(texture, null, null, &rect.w, &rect.h) == 0);
@@ -100,10 +100,10 @@ void shapedWindowFromImage(    SDL_Window*   window,
 
         SDL_LockSurface(surface);
         Uint32 pixel = ( cast(Uint32*)(surface.pixels) )[0];
+        SDL_UnlockSurface(surface);
         // R,G,Bの各色成分を得る
         SDL_Color tColor;
         SDL_GetRGB(pixel, surface.format, &tColor.r, &tColor.g, &tColor.b);
-        SDL_UnlockSurface(surface);
 
         shapeMode.parameters.colorKey = tColor;
     }
@@ -152,7 +152,7 @@ void main(string[] args)
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
     // レンダラーの生成
-    auto renderer = enforceSdl(SDL_CreateRenderer(window, -1, 0));
+    auto renderer = enforceSdl(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED));
     scope(exit) SDL_DestroyRenderer(renderer);
 
     SDL_Surface* surface;

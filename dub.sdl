@@ -3,13 +3,12 @@ description "A minimal D application."
 authors "nak2yoshi"
 copyright "Copyright © 2017, nak2yoshi"
 license "MIT"
-
-dependency "derelict-sdl2" version=">=2.0.0"
-
-// SetDllDirectory関数を使用するのに必要
-versions "Windows7"
-
+dependency "derelict-sdl2" version="~>3.1.0-alpha.6"
+versions "Windows7"  // undefined identifier `SetDllDirectory`
 buildType "release" {
-    lflags "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup" platform="windows-x86-dmd"
-    lflags "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup" platform="windows-x86_64-dmd"
+	lflags "/exet:nt/su:windows:6.0" platform="windows-x86_omf-dmd"
+	lflags "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup" platform="windows-x86_mscoff-dmd"
+	lflags "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup" platform="windows-x86_64-dmd"
+	lflags "-SUBSYSTEM:WINDOWS" "-ENTRY:wmainCRTStartup" platform="windows-x86-ldc"
+	lflags "-SUBSYSTEM:WINDOWS" "-ENTRY:wmainCRTStartup" platform="windows-x86_64-ldc"
 }

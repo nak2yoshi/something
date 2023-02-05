@@ -3,3 +3,4 @@ lib??/
 library/*
 *.exe
 *.obj
+*.pdb
